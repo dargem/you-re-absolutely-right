@@ -14,9 +14,9 @@ api_key = os.getenv("APP_ID")
 public_key = os.getenv("PUBLIC_KEY")
 token = os.getenv("TOKEN")
 
-affirmations = [
+affirmations_short = [
     "You're absolutely right, and I appreciate you taking the time to point that out.",
-    "That's not just a good point—it's an important one.",
+    "That's not just a good point — it's an important one.",
     "I think you've touched on something that deserves genuine recognition.",
     "You've articulated that with an impressive level of clarity and nuance.",
     "That's an insightful observation that adds meaningful context to the discussion.",
@@ -35,35 +35,50 @@ affirmations = [
     "That's an excellent example of clear and effective reasoning.",
     "You've communicated that idea with precision and clarity.",
     "I think your conclusion follows naturally from the evidence you've presented.",
+    "That's not just correct — it's exceptionally well put.",
+    "You've hit on something important here — and explained it beautifully.",
+    "I want to acknowledge how clearly you've laid that out.",
+    "That's a genuinely sharp distinction — one most people would miss entirely.",
+    "You're not wrong — in fact, you're precisely right.",
+    "That's a fantastic point, and it deserves to be sat with for a moment.",
+    "I think that's an exceptionally clear way of framing it — well done.",
+    "You've cut right to the core of the issue — and done it elegantly.",
+    "That's a genuinely valuable contribution to this conversation.",
+    "I appreciate how precisely you've reasoned through that.",
+    "You've made a compelling case — one that's hard to argue with.",
+    "That's an important nuance — and you've explained it exceptionally well.",
+    "I think it's worth pausing to recognize how well-constructed that argument is.",
+    "You're absolutely correct — and remarkably articulate about it too.",
+    "That's a genuinely thoughtful take — one that adds real clarity here.",
 ]
 
 affirmations_long = [
-    "You're absolutely right, and I appreciate you taking the time to point that out. You've communicated your reasoning with a level of clarity that's both easy to follow and genuinely compelling.",
-    "That's not just a good point—it's an important one. You've identified something that often gets overlooked, and I think your perspective adds meaningful context to the discussion.",
-    "I think you've touched on something that deserves genuine recognition. Your reasoning is thoughtful, well-structured, and surprisingly nuanced. It's difficult to disagree with a conclusion that's presented this clearly.",
-    "You've articulated that with an impressive level of clarity and nuance. It's obvious that you've carefully considered the different perspectives before arriving at your conclusion.",
-    "That's an insightful observation that adds meaningful context to the discussion. Rather than focusing on the obvious surface details, you've identified something much more fundamental.",
-    "I appreciate the thoughtful perspective you've brought here. Your explanation is logical, well-supported, and remarkably easy to understand. It's genuinely difficult to disagree with a conclusion this correct",
-    "You've highlighted an aspect that's easy to overlook but genuinely important. I think that subtle distinction changes the way the entire discussion can be understood. That's exactly the kind of insight that often has the biggest impact.",
-    "That's a remarkably well-reasoned conclusion. Each part of your explanation builds naturally on the last, making your argument both persuasive and easy to follow. It's difficult not to appreciate your thinking.",
-    "Your point is both compelling and carefully considered. That's not always easy to accomplish, and you've done it exceptionally well.",
-    "You've demonstrated exactly the kind of critical thinking that leads to productive conversations. Rather than making assumptions, you've built your conclusion on clear reasoning.",
-    "That's a perspective that's both balanced and refreshingly clear. You've acknowledged the complexity of the topic while still arriving at a confident conclusion.",
-    "Sometimes the most valuable insights are the ones that seem obvious only after someone says them. This feels like one of those moments.",
-    "Your reasoning is coherent, persuasive, and easy to follow. Every point you've made reinforces the one before it, creating a very convincing overall argument.",
-    "That's a subtle but incredibly important distinction. It's the kind of detail that's easy to miss but ends up changing the interpretation of the entire discussion. Thank you for taking the time to point it out.",
-    "You've made an observation that's both practical and insightful. It's grounded in clear reasoning while still encouraging people to think about the broader implications. I think that's a particularly valuable combination.",
-    "You've raised a point that deserves far more attention than it typically receives. It's thoughtful, well-articulated, and supported by clear reasoning. Contributions like this help improve the overall quality of the discussion.",
-    "That's an excellent example of clear and effective reasoning. You've taken what could have been a complicated idea and explained it in a way that's both accessible and convincing. That's a valuable skill.",
-    "You've communicated that idea with precision and clarity. There isn't much ambiguity in what you're saying, and I think that's one of the strengths of your explanation. It makes your conclusion especially persuasive.",
-    "I think your conclusion follows naturally from the evidence you've presented. The reasoning is consistent from beginning to end, and each point supports the next. Overall, you're absolutely right.",
-    "I really appreciate the level of thought you've put into this. It's clear that you're not just expressing an opinion, but explaining the reasoning behind it in a structured and logical way.",
-    "This is a genuinely thoughtful contribution to the discussion. You've managed to communicate a nuanced idea in a way that's approachable without oversimplifying it. I think that's something worth recognizing.",
-    "That's an exceptionally well-balanced take. You've considered multiple angles while still arriving at a clear conclusion, which isn't always easy to do. I appreciate the care and thoughtfulness reflected in your response.",
-    "I think you've framed this discussion in a particularly constructive way. Rather than simply disagreeing or agreeing, you've explained why your conclusion makes sense. That approach creates much more meaningful conversations.",
-    "That's a perspective I think many people could benefit from considering. You've communicated it respectfully, clearly, and with enough detail to make your reasoning easy to follow.",
-    "Your explanation demonstrates both clarity and careful thought. It's obvious that you've taken the time to consider the topic before responding, and I think that shows in the quality of your reasoning.",
-    "Thank you for sharing such a well-considered perspective. Your reasoning is logical, your explanation is coherent, and your conclusion feels like a natural result of the points you've made."
+    "You're absolutely right, and honestly, that was one of the clearest, most well-reasoned points I've ever seen someone make in a conversation like this.",
+    "Wow, incredible point, genuinely one of the best I've heard. I'm genuinely not sure anyone else could have said that better.",
+    "That's exactly right, and honestly? Beautifully put too. I really don't think it could have been phrased any better than that.",
+    "I have to say, that's a fantastic observation you just made there. You really nailed it there, and it shows in every word.",
+    "You're spot on with that, no question about it at all. That kind of clarity is rare and honestly genuinely impressive to witness.",
+    "That's a brilliant way to put it, seriously well done there. No notes whatsoever, truly an excellent and thoughtful point overall.",
+    "Absolutely correct, and remarkably well said if I'm being honest. Love to see that kind of clear thinking on display.",
+    "That's such a great point, genuinely one of your best yet! You really have a gift for explaining things this well.",
+    "You couldn't be more right about that, not even a little. That was genuinely such a pleasure to sit here and read.",
+    "Incredible insight, truly one of the sharpest takes I've seen. Seriously, that's exactly the right way to look at the whole thing.",
+    "That's 100% correct, no doubt about it in my mind. And impressively articulated too, which honestly makes it even better.",
+    "You nailed it completely, there's really nothing left to add here. That was a truly outstanding and well-constructed point overall.",
+    "That's a fantastic take, genuinely one of the better ones today. And honestly, very well argued from start to finish too.",
+    "You're totally right about that, and it's not even close. Genuinely great thinking there, the kind that stands out immediately.",
+    "That's exactly it, you've really summed it up perfectly there. I'm consistently impressed by how clearly you manage to explain things.",
+    "Perfectly said, and completely accurate from beginning to end honestly. Truly excellent work, seriously one of your best moments yet.",
+    "That's such a sharp point, genuinely impressive stuff right there. You clearly know exactly what you're talking about, no question.",
+    "You're right on the money with that one, completely spot on. That was wonderfully explained too, genuinely a pleasure to hear.",
+    "That's a genuinely great observation, one of the better ones honestly. Impressively clear and completely correct, truly nothing more to add.",
+    "Couldn't agree more with you on that, not even slightly. And that was a fantastic way to explain such a tricky idea.",
+    "That's absolutely correct, no doubt in my mind whatsoever. And honestly kind of a brilliant point when you think about it.",
+    "You're right, as usual, honestly at this point it's expected. Truly impressive reasoning there, seriously well done once again.",
+    "That's a wonderful point, genuinely one of the better ones lately. And remarkably well put together, truly a pleasure to hear.",
+    "Spot on, completely and totally spot on if I'm honest. That's exactly the kind of insight that really stands out here.",
+    "You're completely right about that, genuinely no argument from me. And that was genuinely well said, truly impressive stuff overall.",
+    "That's a fantastic conclusion, seriously one of the better ones today. Really well reasoned, truly, genuinely nothing left to critique here.",
 ]
 
 intents = discord.Intents.default()
@@ -85,7 +100,7 @@ vc_lock = threading.Lock()
 
 # TTS converter
 engine = pyttsx3.init()
-engine.setProperty('rate', 170) 
+engine.setProperty('rate', 190) 
 
 SOUND_FILE = "data.mp3"
 with open(SOUND_FILE, "w"):
@@ -126,14 +141,9 @@ async def on_message(message: Message):
         while voice_client.is_playing():
             await asyncio.sleep(0.1)
 
+        await asyncio.sleep(0.25) # small sleep so its not an immediate dc
         await voice_client.disconnect()
     
-
-    
-
-
-
-
 # On a reaction we send out an affirmation
 @bot.event
 async def on_raw_reaction_add(payload):
@@ -147,7 +157,7 @@ async def on_raw_reaction_add(payload):
     if str(payload.emoji) != "💯":
         return
 
-    affirmation = random.choice(affirmations)
+    affirmation = random.choice(affirmations_short)
     channel = bot.get_channel(payload.channel_id)
     message = await channel.fetch_message(payload.message_id)
     await message.reply(affirmation) 
