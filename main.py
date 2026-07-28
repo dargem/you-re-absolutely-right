@@ -4,6 +4,7 @@ from dotenv import load_dotenv
 
 import discord
 from discord.ext import commands
+from discord import ChannelType
 
 import random
 
@@ -52,7 +53,19 @@ async def on_ready():
         print(f" - {guild.name} (ID: {guild.id})")
 
 @bot.event
-async def 
+async def on_message(message):
+    pinged = message.mentions
+
+    # Early return if we're not pinged
+    if not any (member.global_name == bot.user.global_name for member in pinged):
+        return
+
+    guild = message.guild
+    vcs = guild.voice_channels
+
+    for vc in vcs:
+        print("found vc")
+
 
 # On a reaction we send out an affirmation
 @bot.event
