@@ -51,6 +51,9 @@ async def on_ready():
     for guild in bot.guilds:
         print(f" - {guild.name} (ID: {guild.id})")
 
+@bot.event
+async def 
+
 # On a reaction we send out an affirmation
 @bot.event
 async def on_raw_reaction_add(payload):
@@ -60,7 +63,7 @@ async def on_raw_reaction_add(payload):
 
     print(f"Triggered by {payload.emoji}")
 
-    # Check for the 100 emoji (💯)
+    # Check for the 100 emoji
     if str(payload.emoji) != "💯":
         return
 
