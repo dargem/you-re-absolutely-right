@@ -126,13 +126,13 @@ async def on_message(message: Message):
     if users_vc == None or vc_lock.locked(): return
 
     with vc_lock:
+        affirmation = caller_nick + " " + random.choice(affirmations_long) 
+        engine.save_to_file(affirmation, SOUND_FILE)
+        engine.runAndWait()
+
         await users_vc.connect()
 
         voice_client = message.guild.voice_client
-        affirmation = caller_nick + " " + random.choice(affirmations_long) 
-
-        engine.save_to_file(affirmation, SOUND_FILE)
-        engine.runAndWait()
 
         source = discord.FFmpegPCMAudio(SOUND_FILE)
         voice_client.play(source)
@@ -141,7 +141,8 @@ async def on_message(message: Message):
         while voice_client.is_playing():
             await asyncio.sleep(0.1)
 
-        await asyncio.sleep(0.25) # small sleep so its not an immediate dc
+        # can do small sleep so its not an immediate dc
+        # await asyncio.sleep(0.1)
         await voice_client.disconnect()
     
 # On a reaction we send out an affirmation
