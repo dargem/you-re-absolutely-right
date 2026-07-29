@@ -1,4 +1,4 @@
-import os, random, threading, asyncio
+import os, random, threading, asyncio, wave
 
 from dotenv import load_dotenv
 
@@ -6,7 +6,8 @@ import discord
 from discord.ext import commands
 from discord import Message
 
-import pyttsx3
+from piper import PiperVoice, SynthesisConfig
+
 
 load_dotenv()
 
@@ -99,11 +100,16 @@ async def on_ready():
 vc_lock = threading.Lock()
 
 # TTS converter
-engine = pyttsx3.init()
-engine.setProperty('rate', 190) 
+voice = PiperVoice.load("en_US-lessac-medium.onnx")
 
-SOUND_FILE = "data.mp3"
-with open(SOUND_FILE, "w"):
+syn_config = SynthesisConfig(
+    length_scale=0.6, # slightly faster
+    noise_w_scale=1.5,  # more speaking variation
+    normalize_audio=False, # use raw audio from voice
+)
+
+WAV_FILE = "data.wav"
+with open(WAV_FILE, "w"):
     pass
 
 @bot.event
@@ -127,14 +133,14 @@ async def on_message(message: Message):
 
     with vc_lock:
         affirmation = caller_nick + " " + random.choice(affirmations_long) 
-        engine.save_to_file(affirmation, SOUND_FILE)
-        engine.runAndWait()
+        with wave.open(WAV_FILE, "wb") as wav_file:
+            voice.synthesize_wav(affirmation, wav_file, syn_config=syn_config)
 
         await users_vc.connect()
 
         voice_client = message.guild.voice_client
 
-        source = discord.FFmpegPCMAudio(SOUND_FILE)
+        source = discord.FFmpegPCMAudio(WAV_FILE)
         voice_client.play(source)
 
         # Lazily poll until we're finished talking
