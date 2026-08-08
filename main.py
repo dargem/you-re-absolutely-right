@@ -1,13 +1,14 @@
-import os, random, threading, asyncio, wave
+import os, random, asyncio, wave
 
 from dotenv import load_dotenv
 
 import discord
 from discord.ext import commands
-from discord import Message
+from discord import Message, Guild, RawReactionActionEvent
 
+from collections import defaultdict
 from piper import PiperVoice, SynthesisConfig
-from affirmer import RandomSelector
+from affirmer import Affirmer
 
 load_dotenv()
 
@@ -33,14 +34,16 @@ async def on_ready():
 voice = PiperVoice.load("en_US-lessac-medium.onnx")
 
 syn_config = SynthesisConfig(
-    length_scale=0.6, # slightly faster
-    noise_w_scale=1.3,  # more speaking variation
+    length_scale=0.75, # increase to make it slower
+    noise_w_scale=1,  # increase to make more speaking variation
     normalize_audio=False, # use raw audio from voice
 )
 
 WAV_FILE = "data.wav"
 with open(WAV_FILE, "w"):
     pass
+
+guild_affirmers: defaultdict[Guild, Affirmer] = defaultdict(Affirmer)
 
 # If we've been pinged we will join VC and send an affirmation to the sender
 # The bot cannot join multiple vc's simultaneously in same guild
@@ -56,7 +59,7 @@ async def on_message(message: Message):
     if not any (member.global_name == bot.user.global_name for member in pinged):
         return
 
-    caller_nick = message.author.name
+    name = message.author.name
 
     vc = message.author.voice
     if vc == None: return
@@ -64,7 +67,7 @@ async def on_message(message: Message):
     user_channel = vc.channel
     if user_channel == None: return
 
-    affirmation = caller_nick + " " + random.choice(affirmations_long) 
+    affirmation = guild_affirmers[message.guild].get_long(name)
     with wave.open(WAV_FILE, "wb") as wav_file:
         voice.synthesize_wav(affirmation, wav_file, syn_config=syn_config)
 
@@ -84,7 +87,7 @@ async def on_message(message: Message):
     
 # On a reaction we send out an affirmation
 @bot.event
-async def on_raw_reaction_add(payload):
+async def on_raw_reaction_add(payload: RawReactionActionEvent):
     # Ignore the bot's own reactions
     if payload.user_id == bot.user.id:
         return
@@ -95,7 +98,8 @@ async def on_raw_reaction_add(payload):
     if str(payload.emoji) != "💯":
         return
 
-    affirmation = random.choice(affirmations_short)
+    
+    affirmation = guild_affirmers[payload.member.guild].get_short(payload.member.name)
     channel = bot.get_channel(payload.channel_id)
     message = await channel.fetch_message(payload.message_id)
     await message.reply(affirmation) 
