@@ -79,7 +79,7 @@ async def on_message(message: Message):
 
     # Lazily poll until we're finished talking
     while voice_client.is_playing():
-        await asyncio.sleep(0.1)
+        await asyncio.sleep(0.05)
 
     # can do small sleep so its not an immediate dc
     # await asyncio.sleep(0.1)
@@ -98,10 +98,10 @@ async def on_raw_reaction_add(payload: RawReactionActionEvent):
     if str(payload.emoji) != "💯":
         return
 
-    
-    affirmation = guild_affirmers[payload.member.guild].get_short(payload.member.name)
     channel = bot.get_channel(payload.channel_id)
     message = await channel.fetch_message(payload.message_id)
+
+    affirmation = guild_affirmers[payload.member.guild].get_short(message.author.name)
     await message.reply(affirmation) 
 
 # Startup
