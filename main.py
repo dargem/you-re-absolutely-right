@@ -1,4 +1,4 @@
-import os, random, asyncio, wave
+import os, asyncio, wave, tempfile
 
 from dotenv import load_dotenv
 
@@ -39,10 +39,6 @@ syn_config = SynthesisConfig(
     normalize_audio=False, # use raw audio from voice
 )
 
-WAV_FILE = "data.wav"
-with open(WAV_FILE, "w"):
-    pass
-
 guild_affirmers: defaultdict[Guild, Affirmer] = defaultdict(Affirmer)
 
 # If we've been pinged we will join VC and send an affirmation to the sender
@@ -68,22 +64,25 @@ async def on_message(message: Message):
     if user_channel == None: return
 
     affirmation = guild_affirmers[message.guild].get_long(name)
-    with wave.open(WAV_FILE, "wb") as wav_file:
-        voice.synthesize_wav(affirmation, wav_file, syn_config=syn_config)
 
-    await user_channel.connect()
-    voice_client = message.guild.voice_client
+    # Create a tempfile to play our audio in
+    with tempfile.NamedTemporaryFile(suffix=".wav") as temp:
+        with wave.open(temp.name, "wb") as wav_file:
+            voice.synthesize_wav(
+                affirmation,
+                wav_file,
+                syn_config=syn_config
+            )
 
-    source = discord.FFmpegPCMAudio(WAV_FILE)
-    voice_client.play(source)
+        source = discord.FFmpegPCMAudio(temp.name)
 
-    # Lazily poll until we're finished talking
-    while voice_client.is_playing():
-        await asyncio.sleep(0.05)
+        voice_client = await user_channel.connect()
+        voice_client.play(source)
 
-    # can do small sleep so its not an immediate dc
-    # await asyncio.sleep(0.1)
-    await voice_client.disconnect()
+        while voice_client.is_playing():
+            await asyncio.sleep(0.05)
+
+        await voice_client.disconnect()
     
 # On a reaction we send out an affirmation
 @bot.event
