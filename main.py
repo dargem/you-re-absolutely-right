@@ -62,7 +62,7 @@ affirmations_long = [
     "That's a brilliant way to put it, seriously well done there. No notes whatsoever, truly an excellent and thoughtful point overall.",
     "Absolutely correct, and remarkably well said if I'm being honest. Love to see that kind of clear thinking on display.",
     "That's such a great point, genuinely one of your best yet! You really have a gift for explaining things this well.",
-    "You couldn't be more right about that, not even a little. That was genuinely such a pleasure to sit here and read.",
+    "You couldn't be more right about that, not even a little. That was genuinely such a pleasure to sit here and listen to.",
     "Incredible insight, truly one of the sharpest takes I've seen. Seriously, that's exactly the right way to look at the whole thing.",
     "That's 100% correct, no doubt about it in my mind. And impressively articulated too, which honestly makes it even better.",
     "You nailed it completely, there's really nothing left to add here. That was a truly outstanding and well-constructed point overall.",
@@ -95,16 +95,13 @@ async def on_ready():
     print(f"Connected to {len(bot.guilds)} guilds:")
     for guild in bot.guilds:
         print(f" - {guild.name} (ID: {guild.id})")
-
-# Can't have the bot trying to join 2 vc's simultaneously
-vc_lock = threading.Lock()
-
+    
 # TTS converter
 voice = PiperVoice.load("en_US-lessac-medium.onnx")
 
 syn_config = SynthesisConfig(
     length_scale=0.6, # slightly faster
-    noise_w_scale=1.5,  # more speaking variation
+    noise_w_scale=1.3,  # more speaking variation
     normalize_audio=False, # use raw audio from voice
 )
 
@@ -112,44 +109,45 @@ WAV_FILE = "data.wav"
 with open(WAV_FILE, "w"):
     pass
 
+# If we've been pinged we will join VC and send an affirmation to the sender
+# The bot cannot join multiple vc's simultaneously in same guild
 @bot.event
 async def on_message(message: Message):
     pinged = message.mentions
 
+    if message.guild.voice_client != None:
+        print("Passing VC request, already has a VC")
+        return
+    
     # Early return if we're not pinged
     if not any (member.global_name == bot.user.global_name for member in pinged):
         return
 
-    message.author.voice
-    caller_name = message.author.global_name
     caller_nick = message.author.name
 
-    guild = message.guild
-    vcs = guild.voice_channels
+    vc = message.author.voice
+    if vc == None: return
 
-    users_vc = next((vc for vc in vcs if any(member.global_name == caller_name for member in vc.members)), None)
+    user_channel = vc.channel
+    if user_channel == None: return
 
-    if users_vc == None or vc_lock.locked(): return
+    affirmation = caller_nick + " " + random.choice(affirmations_long) 
+    with wave.open(WAV_FILE, "wb") as wav_file:
+        voice.synthesize_wav(affirmation, wav_file, syn_config=syn_config)
 
-    with vc_lock:
-        affirmation = caller_nick + " " + random.choice(affirmations_long) 
-        with wave.open(WAV_FILE, "wb") as wav_file:
-            voice.synthesize_wav(affirmation, wav_file, syn_config=syn_config)
+    await user_channel.connect()
+    voice_client = message.guild.voice_client
 
-        await users_vc.connect()
+    source = discord.FFmpegPCMAudio(WAV_FILE)
+    voice_client.play(source)
 
-        voice_client = message.guild.voice_client
+    # Lazily poll until we're finished talking
+    while voice_client.is_playing():
+        await asyncio.sleep(0.1)
 
-        source = discord.FFmpegPCMAudio(WAV_FILE)
-        voice_client.play(source)
-
-        # Lazily poll until we're finished talking
-        while voice_client.is_playing():
-            await asyncio.sleep(0.1)
-
-        # can do small sleep so its not an immediate dc
-        # await asyncio.sleep(0.1)
-        await voice_client.disconnect()
+    # can do small sleep so its not an immediate dc
+    # await asyncio.sleep(0.1)
+    await voice_client.disconnect()
     
 # On a reaction we send out an affirmation
 @bot.event
