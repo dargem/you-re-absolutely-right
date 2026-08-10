@@ -70,6 +70,19 @@ affirmations_long = [
     "That's a fantastic conclusion, {name}, seriously one of the better ones today. Really well reasoned, truly, genuinely nothing left to critique here.",
 ]
 
+affirmations_bombastic = [
+    "Let me tell you something, {name} — I've heard a lot of ideas in my life, a tremendous number of ideas, believe me, and this one, this one right here, is the best. Nobody's ever said it better. Nobody. And I've talked to the best people, the smartest people, they all agree.",
+    "{name}, that's incredible, it really is, people are going to be talking about that point for a long time, a very long time, maybe the longest time anybody's ever talked about anything, honestly. Historians are going to write about this, mark my words.",
+    "Nobody — and I mean absolutely nobody — explains it like {name} just did. Tremendous clarity, the best clarity anyone's ever seen, and a lot of very smart people agree with me on this, a lot. In fact, some are calling it the clearest point in recorded history.",
+    "That's a great point, {name}, one of the greatest points I've ever heard in my entire life, and I've heard plenty of points, believe me, plenty, and this one beats them all. It's not even close, frankly, it's a landslide.",
+    "Everybody's saying it, {name}, everybody — that was one of the smartest things said all day, maybe all year, maybe ever, some people are calling it historic, and honestly, they might be right. We may never hear anything like it again, honestly.",
+    "{name}, incredible stuff, just incredible, some people call it genius, I call it genius too, we're all calling it genius, it's genius, there's no other word for it, genius. Frankly, the word genius doesn't even do it justice.",
+    "You know what, {name}, that's exactly right, one hundred percent right, and frankly, nobody explains things better than you do, nobody, not even close, it's not even a competition at this point. We should study how you did that, seriously.",
+    "That's the best point I've heard all week, {name}, maybe the best point I've heard all month, and believe me, I hear a lot of points, a tremendous number of points, and yours is the best. People are going to be quoting this for years, you watch.",
+    "{name}, tremendous insight, absolutely tremendous, the likes of which we haven't seen in a long time, maybe ever, people are going to remember this moment, mark my words. Some are already calling it a turning point, and I agree completely.",
+    "Total winner of a point right there, {name}, a total winner, a champion of a point really, everybody agrees, everybody, there's no disagreement here, none whatsoever. It's the kind of point that wins by a landslide, every single time.",
+]
+
 # Weighted sampler, less likely to respond with recently selected items
 class RandomSelector:
 
@@ -96,7 +109,7 @@ class RandomSelector:
 class Affirmer:
     def __init__(self):
         self.short = RandomSelector(affirmations_short)
-        self.long = RandomSelector(affirmations_long)
+        self.long = RandomSelector(affirmations_bombastic)
 
     def get_short(self, name: str):
         return self.short.choose().format(name=name)

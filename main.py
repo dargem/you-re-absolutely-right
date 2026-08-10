@@ -34,7 +34,7 @@ async def on_ready():
 voice = PiperVoice.load("en_US-lessac-medium.onnx")
 
 syn_config = SynthesisConfig(
-    length_scale=0.75, # increase to make it slower
+    length_scale=0.9, # increase to make it slower
     noise_w_scale=1,  # increase to make more speaking variation
     normalize_audio=False, # use raw audio from voice
 )
