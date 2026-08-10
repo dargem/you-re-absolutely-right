@@ -77,12 +77,20 @@ async def on_message(message: Message):
         source = discord.FFmpegPCMAudio(temp.name)
 
         voice_client = await user_channel.connect()
-        voice_client.play(source)
+        
+        # Use an event to wait for the audio to finish
+        done = asyncio.Event()
+        def after_playing(error):
+            if error:
+                print(f"Player error: {error}")
+            bot.loop.call_soon_threadsafe(done.set)
 
-        while voice_client.is_playing():
-            await asyncio.sleep(0.05)
+        voice_client.play(source, after=after_playing)
 
-        await voice_client.disconnect()
+        await done.wait()
+
+        if message.guild.voice_client:
+            await voice_client.disconnect()
     
 # On a reaction we send out an affirmation
 @bot.event
