@@ -9,6 +9,7 @@ from discord import Message, Guild, RawReactionActionEvent
 from collections import defaultdict
 from piper import PiperVoice, SynthesisConfig
 from affirmer import Affirmer
+from spam_buffer import SpamBuffer
 
 load_dotenv()
 
@@ -91,7 +92,10 @@ async def on_message(message: Message):
 
         if message.guild.voice_client:
             await voice_client.disconnect()
-    
+
+# Used to filter spam
+spam_buffer = SpamBuffer()
+
 # On a reaction we send out an affirmation
 @bot.event
 async def on_raw_reaction_add(payload: RawReactionActionEvent):
@@ -105,10 +109,16 @@ async def on_raw_reaction_add(payload: RawReactionActionEvent):
     if str(payload.emoji) != "💯":
         return
 
+
     channel = bot.get_channel(payload.channel_id)
     message = await channel.fetch_message(payload.message_id)
 
-    affirmation = guild_affirmers[payload.member.guild].get_short(message.author.name)
+    name = message.author.name
+
+    if not spam_buffer.add(name):
+        return # Considered spam
+
+    affirmation = guild_affirmers[payload.member.guild].get_short(name)
     await message.reply(affirmation) 
 
 # Startup
