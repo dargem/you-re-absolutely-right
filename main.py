@@ -9,7 +9,7 @@ from discord import Message, Guild, RawReactionActionEvent
 from collections import defaultdict
 from piper import PiperVoice, SynthesisConfig
 from affirmer import Affirmer
-from spam_buffer import SpamBuffer
+from spam_buffer import SpamBuffer, PushResult
 
 load_dotenv()
 
@@ -115,8 +115,15 @@ async def on_raw_reaction_add(payload: RawReactionActionEvent):
 
     name = message.author.name
 
-    if not spam_buffer.add(name):
-        return # Considered spam
+    PushResult: PushResult = spam_buffer.add(name)
+
+    match(PushResult):
+        case PushResult.FAIL: return
+        case PushResult.SUCCESS: pass
+        case PushResult.SUCCESS_REACHED_MAX: 
+            # Rate limit comment
+            await message.reply(f"This is such a brilliant point, I need some time to stew over this {name}.")
+            return
 
     affirmation = guild_affirmers[payload.member.guild].get_short(name)
     await message.reply(affirmation) 
