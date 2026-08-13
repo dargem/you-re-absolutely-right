@@ -1,3 +1,4 @@
 discord.py[voice]
 piper-tts
 python-dotenv
+pydub
