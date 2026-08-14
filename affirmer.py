@@ -88,7 +88,7 @@ affirmations_bombastic = [
     f"Total winner of a point right there, {NAME_REPLACEMENT_SYM}, a total winner, a champion of a point really, everybody agrees, everybody, there's no disagreement here, none whatsoever.",
 ]
 
-WAV_CACHE = "wav_cache"
+WAV_CACHE = Path("wav_cache")
 
 # The cache_lock must be acquired on writes to wav_cache
 cache_lock = Lock()
@@ -106,14 +106,16 @@ class Affirmer:
     def _get_TTS(self, text: str) -> Path:
         search_term = text + ".wav"
 
+        WAV_CACHE.mkdir(exist_ok=True)
+
         # Very simple storage, name of wav is == text it speaks out. 
         # We have a "cache" where if text is the name of a file,
         with cache_lock:
-            for file in Path(WAV_CACHE).iterdir():
+            for file in WAV_CACHE.iterdir():
                 if file.name == search_term:
-                    return file.name
+                    return file
 
-            wanted_path = Path(WAV_CACHE + "/" + search_term)
+            wanted_path = WAV_CACHE / search_term
             # We have not found it in our cache, so we lazily generate it
             self.TTS.generate_text(text, wanted_path)
 
@@ -134,18 +136,20 @@ class Affirmer:
         """
 
         parts = re.split(f"(?={re.escape(NAME_REPLACEMENT_SYM)})|(?<={re.escape(NAME_REPLACEMENT_SYM)})", affirmation)
-        lines = [name if part == NAME_REPLACEMENT_SYM else part for part in parts]
+        lines = [name if part == NAME_REPLACEMENT_SYM else part for part in parts if part.strip()]
         paths = [self._get_TTS(line) for line in lines]
 
         # Chain together our paths into the given output file
-        with wave.open(paths[0].name, "rb") as first:
+        with wave.open(str(paths[0]), "rb") as first:
             params = first.getparams()
 
-        with wave.open(output.name, "wb") as out:
+        with wave.open(str(output), "wb") as out:
             out.setparams(params)
             for path in paths:
-                with wave.open(path.name, "rb") as inp:
+                with wave.open(str(path), "rb") as inp:
                     out.writeframes(inp.readframes(inp.getnframes()))
+
+
 
 
         

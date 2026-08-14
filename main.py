@@ -10,6 +10,8 @@ from collections import defaultdict
 from piper import PiperVoice, SynthesisConfig
 from affirmer import Affirmer
 from spam_buffer import SpamBuffer, PushResult
+from pathlib import Path
+from TTS import PiedPierTTS
 
 load_dotenv()
 
@@ -40,7 +42,7 @@ syn_config = SynthesisConfig(
     normalize_audio=False, # use raw audio from voice
 )
 
-guild_affirmers: defaultdict[Guild, Affirmer] = defaultdict(Affirmer)
+guild_affirmers: defaultdict[Guild, Affirmer] = defaultdict(lambda: Affirmer(PiedPierTTS()))
 
 # If we've been pinged we will join VC and send an affirmation to the sender
 # The bot cannot join multiple vc's simultaneously in same guild
@@ -64,17 +66,9 @@ async def on_message(message: Message):
     user_channel = vc.channel
     if user_channel == None: return
 
-    affirmation = guild_affirmers[message.guild].get_long(name)
-
     # Create a tempfile to play our audio in
     with tempfile.NamedTemporaryFile(suffix=".wav") as temp:
-        with wave.open(temp.name, "wb") as wav_file:
-            voice.synthesize_wav(
-                affirmation,
-                wav_file,
-                syn_config=syn_config
-            )
-
+        guild_affirmers[message.guild].write_voice(name, Path(temp.name))
         source = discord.FFmpegPCMAudio(temp.name)
 
         voice_client = await user_channel.connect()

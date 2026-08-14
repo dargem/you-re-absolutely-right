@@ -5,7 +5,7 @@ import wave
 
 class AbstractTTS(ABC):
     @abstractmethod
-    def generate_text(text: str, path: Path):
+    def generate_text(self, text: str, path: Path):
         pass
 
 
@@ -23,7 +23,7 @@ class PiedPierTTS(AbstractTTS):
         self.voice = voice
 
     def generate_text(self, text: str, path: Path):
-        with wave.open(path.name, "wb") as wav_f:
+        with wave.open(str(path), "wb") as wav_f:
             self.voice.synthesize_wav(
                 text,
                 wav_f,
