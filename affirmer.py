@@ -87,19 +87,9 @@ affirmations_bombastic = [
 
 WAV_CACHE = "wav_cache"
 
+# The cache_lock must be acquired on writes to wav_cache
+# Reads do not require the cache as writes only do creation not modification of elements
 cache_lock = Lock()
-
-# Very simple storage, name of file is == TTS it speaks out. 
-
-# We have a "cache" where if text is the name of a file,
-# we can reuse the file by concatenating it
-def get_TTS(text: str) -> str:
-    with cache_lock:
-        for file in Path(WAV_CACHE).iterdir():
-            if file.name == text:
-                return file.name
-
-    # We have not found it in our cache, so we need to generate it
 
 # Generates affirmations  
 class Affirmer:
@@ -110,14 +100,23 @@ class Affirmer:
     def get_text(self, name: str) -> str:
         return self.short.choose().replace(NAME_REPLACEMENT_SYM, name)
 
-    # Write a voice to the given file
-    def write_voice(self, voice: str, filename: str) -> None:
+    # Very simple storage, name of file is == TTS it speaks out. 
+    # We have a "cache" where if text is the name of a file,
+    # we can reuse the file by concatenating it
+    def _get_TTS(self, text: str) -> str:
+        with cache_lock:
+            for file in Path(WAV_CACHE).iterdir():
+                if file.name == text:
+                    return file.name
+
+        # We have not found it in our cache, so we lazily generate it
+
+    # Write a voice to a file, returns Path
+    def write_voice(self, voice: str) -> Path:
         affirmation = self.long.choose()
 
         # The affirmation does not have to have a name
         # We expect it to be length 1 (no name) or length 2 (name in middle)
         parts = affirmation.split(NAME_REPLACEMENT_SYM)
-
-
-
         
+            
