@@ -2,6 +2,9 @@ from selector import RandomSelector
 from pydub import AudioSegment
 from threading import Lock
 from pathlib import Path
+from TTS import AbstractTTS
+import re
+import wave
 
 NAME_REPLACEMENT_SYM = "%"
 
@@ -88,35 +91,67 @@ affirmations_bombastic = [
 WAV_CACHE = "wav_cache"
 
 # The cache_lock must be acquired on writes to wav_cache
-# Reads do not require the cache as writes only do creation not modification of elements
 cache_lock = Lock()
 
 # Generates affirmations  
 class Affirmer:
-    def __init__(self):
+    def __init__(self, TTS: AbstractTTS):
         self.short = RandomSelector(affirmations_short)
         self.long = RandomSelector(affirmations_bombastic)
+        self.TTS = TTS
 
     def get_text(self, name: str) -> str:
         return self.short.choose().replace(NAME_REPLACEMENT_SYM, name)
 
-    # Very simple storage, name of file is == TTS it speaks out. 
-    # We have a "cache" where if text is the name of a file,
-    # we can reuse the file by concatenating it
-    def _get_TTS(self, text: str) -> str:
+    def _get_TTS(self, text: str) -> Path:
+        search_term = text + ".wav"
+
+        # Very simple storage, name of wav is == text it speaks out. 
+        # We have a "cache" where if text is the name of a file,
         with cache_lock:
             for file in Path(WAV_CACHE).iterdir():
-                if file.name == text:
+                if file.name == search_term:
                     return file.name
 
-        # We have not found it in our cache, so we lazily generate it
+            wanted_path = Path(WAV_CACHE + "/" + search_term)
+            # We have not found it in our cache, so we lazily generate it
+            self.TTS.generate_text(text, wanted_path)
 
-    # Write a voice to a file, returns Path
-    def write_voice(self, voice: str) -> Path:
+        return wanted_path
+
+    # Write a voice to a given wav file
+    def write_voice(self, name: str, output: Path) -> None:
         affirmation = self.long.choose()
 
-        # The affirmation does not have to have a name
-        # We expect it to be length 1 (no name) or length 2 (name in middle)
-        parts = affirmation.split(NAME_REPLACEMENT_SYM)
+        """ The regex splits it like this
+        [
+            "Total winner of a point right there, ",
+            "{name_replacement_sym}",
+            ", a total winner"
+        ]
+
+        Keeps it as 1 line if its not split
+        """
+
+        parts = re.split(f"(?={re.escape(NAME_REPLACEMENT_SYM)})|(?<={re.escape(NAME_REPLACEMENT_SYM)})", affirmation)
+        lines = [name if part == NAME_REPLACEMENT_SYM else part for part in parts]
+        paths = [self._get_TTS(line) for line in lines]
+
+        # Chain together our paths into the given output file
+        with wave.open(paths[0].name, "rb") as first:
+            params = first.getparams()
+
+        with wave.open(output.name, "wb") as out:
+            out.setparams(params)
+            for path in paths:
+                with wave.open(path.name, "rb") as inp:
+                    out.writeframes(inp.readframes(inp.getnframes()))
+
+
+        
+
+        
+        
+
         
             

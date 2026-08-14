@@ -1,4 +1,5 @@
 wav_cache/
+temps/
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
