@@ -2,10 +2,20 @@ from abc import ABC, abstractmethod
 from pathlib import Path
 from piper import PiperVoice, SynthesisConfig
 import wave
+from elevenlabs import save
+from elevenlabs import ElevenLabs
+from dotenv import load_dotenv
+import os
 
 class AbstractTTS(ABC):
     @abstractmethod
     def generate_text(self, text: str, path: Path):
+        pass
+
+    # Get identifier for model name so we know what we are "dealing with" for caching
+    # In practice can just be the name of the model + config options
+    @abstractmethod
+    def get_model_id(self) -> str:
         pass
 
 
@@ -29,3 +39,23 @@ class PiedPierTTS(AbstractTTS):
                 wav_f,
                 syn_config=self.config
             )
+
+    
+
+load_dotenv()
+
+class ElevenLabsTTS(AbstractTTS):
+    def __init__(
+        self, client: ElevenLabs = ElevenLabs(api_key=os.getenv("ELEVEN_LABS_API"))
+    ):
+        self.client = client
+
+    def generate_text(self, text: str, path: Path):
+        audio = self.client.generate(
+            text=text,
+            voice="Rachel",
+            model="eleven_multilingual_v2"
+        )
+
+        save(audio, str(path))
+        
