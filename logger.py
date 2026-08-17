@@ -2,6 +2,8 @@ from threading import Lock
 from enum import Enum
 from pathlib import Path
 import sys
+from datetime import datetime
+from zoneinfo import ZoneInfo
 
 # For flexibility all logs go inside LOG_FOLDER, 
 # so if you want to log for a specific guild or process,
@@ -24,6 +26,7 @@ class Level(Enum):
     ERROR   = 4
     FATAL   = 5
 
+# Colour reset
 RESET = "\033[0m"
 ANSI_CODES = {
     Level.TRACE:   "\033[90m",   # grey
@@ -42,18 +45,15 @@ class Logger:
         return ANSI_CODES.get(level)
 
     def log(self, level: Level, msg: str) -> None:
-        log_entry = f"[{level.name}] {msg}\n"
+        log_entry = f"[{level.name}] {msg}"
+        time = datetime.now(ZoneInfo("Australia/Sydney"))
 
         with lock_maker:
             file_lock = file_locks.setdefault(str(self.log_file), Lock())
             with file_lock:
                 with open(self.log_file, "a", encoding="utf-8") as file:
-                    file.write(log_entry)
+                    file.write(f"{log_entry.rstrip()} : {time.isoformat(sep=" ", timespec="seconds")}\n")
 
         # Print colored output only to the terminal.
         color = self._ansi_color(level)
-        print(f"{color}{log_entry.rstrip()}{RESET}", file=sys.stdout)
-
-if __name__ == "__main__":
-    logger = Logger("Other_file")
-    logger.log(Level.FATAL, "Bad stuff")
+        print(f"{color}{log_entry.rstrip()}{RESET} : {time.isoformat(sep=" ", timespec="seconds")}", file=sys.stdout)
