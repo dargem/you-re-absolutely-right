@@ -11,6 +11,7 @@ from zoneinfo import ZoneInfo
 LOG_FOLDER = Path("logs")
 GLOBAL_LOGS = Path("general_logs.txt")
 LOG_FOLDER.mkdir(parents=True, exist_ok=True)
+LOG_TIMEZONE = ZoneInfo("Australia/Sydney") # We just default to using Sydney time
 
 # Must be acquired to write to the log file to avoid data corruption
 # To make a file_lock you must acquire lock_maker to avoid race conditions
@@ -46,14 +47,15 @@ class Logger:
 
     def log(self, level: Level, msg: str) -> None:
         log_entry = f"[{level.name}] {msg}"
-        time = datetime.now(ZoneInfo("Australia/Sydney"))
+        time = datetime.now(LOG_TIMEZONE)
+        timestamp = time.isoformat(sep=" ", timespec="seconds")
 
         with lock_maker:
             file_lock = file_locks.setdefault(str(self.log_file), Lock())
             with file_lock:
                 with open(self.log_file, "a", encoding="utf-8") as file:
-                    file.write(f"{log_entry.rstrip()} : {time.isoformat(sep=" ", timespec="seconds")}\n")
+                    file.write(f"{log_entry.rstrip()} : {timestamp}\n")
 
         # Print colored output only to the terminal.
         color = self._ansi_color(level)
-        print(f"{color}{log_entry.rstrip()}{RESET} : {time.isoformat(sep=" ", timespec="seconds")}", file=sys.stdout)
+        print(f"{color}{log_entry.rstrip()}{RESET} : {timestamp}", file=sys.stdout)

@@ -11,6 +11,7 @@ from affirmer import Affirmer
 from spam_buffer import SpamBuffer, PushResult
 from pathlib import Path
 from TTS import PiedPierTTS
+from logger import Logger, Level
 
 load_dotenv()
 
@@ -24,13 +25,15 @@ intents.message_content = True  # Required to read text commands
 # Bot will trigger on pings
 bot = commands.Bot(command_prefix="!", intents=intents)
 
+logger = Logger()
+
 # Log setup success
 @bot.event
 async def on_ready():
-    print(f"Logged in successfully as {bot.user}")
-    print(f"Connected to {len(bot.guilds)} guilds:")
+    logger.log(Level.INFO, f"Logged in successfully as {bot.user}")
+    logger.log(Level.INFO, f"Connected to {len(bot.guilds)} guilds:")
     for guild in bot.guilds:
-        print(f" - {guild.name} (ID: {guild.id})")
+        logger.log(Level.INFO, f" - {guild.name} (ID: {guild.id})")
 
 guild_affirmers: defaultdict[Guild, Affirmer] = defaultdict(lambda: Affirmer(PiedPierTTS()))
 
@@ -41,7 +44,9 @@ async def on_message(message: Message):
     pinged = message.mentions
 
     if message.guild.voice_client != None:
-        print("Passing VC request, already has a VC")
+        # For now we just skip it, could consider something like a job queue?
+        # Would likely result in very bad latency though in those cases and would have to check for spam
+        logger.log(Level.WARNING, "Passing VC request, already has a VC")
         return
     
     # Early return if we're not pinged
@@ -67,7 +72,7 @@ async def on_message(message: Message):
         done = asyncio.Event()
         def after_playing(error):
             if error:
-                print(f"Player error: {error}")
+                logger.log(Level.ERROR, f"Player error: {error}")
             bot.loop.call_soon_threadsafe(done.set)
 
         voice_client.play(source, after=after_playing)
@@ -78,7 +83,7 @@ async def on_message(message: Message):
             await voice_client.disconnect()
 
 # Used to filter spam
-spam_buffer = SpamBuffer()
+spam_buffer = SpamBuffer(logger)
 
 # On a reaction we send out an affirmation
 @bot.event
@@ -87,7 +92,7 @@ async def on_raw_reaction_add(payload: RawReactionActionEvent):
     if payload.user_id == bot.user.id:
         return
 
-    print(f"Triggered by {payload.emoji}")
+    logger.log(Level.DEBUG, f"Triggered by {payload.emoji}")
 
     # Check for the 100 emoji
     if str(payload.emoji) != "💯":
@@ -102,10 +107,13 @@ async def on_raw_reaction_add(payload: RawReactionActionEvent):
     PushResult: PushResult = spam_buffer.add(name)
 
     match(PushResult):
-        case PushResult.FAIL: return
+        case PushResult.FAIL: 
+            logger.log(Level.WARNING, f"Ignored user {name} after spam was detected")
+            return
         case PushResult.SUCCESS: pass
         case PushResult.SUCCESS_REACHED_MAX: 
             # Rate limit comment
+            logger.log(Level.WARNING, f"Gave user {name} rate limit response")
             await message.reply(f"This is such a brilliant point, I need some time to stew over this {name}.")
             return
 

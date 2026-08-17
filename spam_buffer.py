@@ -3,6 +3,8 @@ import time
 from threading import Lock
 from enum import Enum
 
+from logger import Level, Logger
+
 class PushResult(Enum):
     FAIL = 0,
     SUCCESS = 1,
@@ -12,13 +14,14 @@ class PushResult(Enum):
 # If the queue is full you cannot add to it. Adding to a full queue is considered "spams"
 class SpamBuffer:
     # max_req per dur, managed by a queue
-    def __init__(self, max_req = 4, dur = 50):
+    def __init__(self, logger: Logger, max_req: int = 4, dur: int = 50):
         # Maps username -> deque[floats of call time, got by time.monotonic()]
         self.calls: defaultdict[str, deque[float]] = defaultdict(lambda: deque(maxlen=max_req))
         self.dur = dur
+        self.logger = logger
 
         # Global lock for all names, can change this to be name level to get a more fine grained version if needed
-        self.lock = Lock() 
+        self.lock = Lock()
 
     # Try to add a name to the spam buffer, if adding fails this is considered "spam"
     def add(self, name: str) -> PushResult:
@@ -32,6 +35,8 @@ class SpamBuffer:
 
                 dq.popleft()
 
-            if len(dq) == dq.maxlen: return PushResult.FAIL
+            if len(dq) == dq.maxlen:
+                self.logger.log(Level.WARNING, f"Ignored user {name} for spam protection")
+                return PushResult.FAIL
             dq.append(current)
             return PushResult.SUCCESS_REACHED_MAX if len(dq) == dq.maxlen else PushResult.SUCCESS
