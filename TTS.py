@@ -14,9 +14,9 @@ class AbstractTTS(ABC):
 
     # Get identifier for model name so we know what we are "dealing with" for caching
     # In practice can just be the name of the model + config options
-    @abstractmethod
-    def get_model_id(self) -> str:
-        pass
+    # @abstractmethod
+    # def get_model_id(self) -> str:
+    #     pass
 
 
 class PiedPierTTS(AbstractTTS):
