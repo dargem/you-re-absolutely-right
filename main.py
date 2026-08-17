@@ -1,4 +1,5 @@
-import os, asyncio, wave, tempfile
+import os, asyncio, wave, tempfile, traceback
+from functools import wraps
 
 from dotenv import load_dotenv
 
@@ -27,8 +28,20 @@ bot = commands.Bot(command_prefix="!", intents=intents)
 
 logger = Logger()
 
+
+def log_event_errors(func):
+    @wraps(func)
+    async def wrapper(*args, **kwargs):
+        try:
+            return await func(*args, **kwargs)
+        except Exception:
+            logger.log(Level.ERROR, f"Unhandled error in {func.__name__}\n{traceback.format_exc()}")
+
+    return wrapper
+
 # Log setup success
 @bot.event
+@log_event_errors
 async def on_ready():
     logger.log(Level.INFO, f"Logged in successfully as {bot.user}")
     logger.log(Level.INFO, f"Connected to {len(bot.guilds)} guilds:")
@@ -40,6 +53,7 @@ guild_affirmers: defaultdict[Guild, Affirmer] = defaultdict(lambda: Affirmer(Pie
 # If we've been pinged we will join VC and send an affirmation to the sender
 # The bot cannot join multiple vc's simultaneously in same guild
 @bot.event
+@log_event_errors
 async def on_message(message: Message):
     pinged = message.mentions
 
@@ -56,7 +70,9 @@ async def on_message(message: Message):
     name = message.author.name
 
     vc = message.author.voice
-    if vc == None: return
+    if vc == None: 
+        logger.log(Level.INFO, "Pinged by user not in VC, ignoring")
+        return
 
     user_channel = vc.channel
     if user_channel == None: return
@@ -87,6 +103,7 @@ spam_buffer = SpamBuffer(logger)
 
 # On a reaction we send out an affirmation
 @bot.event
+@log_event_errors
 async def on_raw_reaction_add(payload: RawReactionActionEvent):
     # Ignore the bot's own reactions
     if payload.user_id == bot.user.id:
@@ -117,7 +134,7 @@ async def on_raw_reaction_add(payload: RawReactionActionEvent):
             await message.reply(f"This is such a brilliant point, I need some time to stew over this {name}.")
             return
 
-    affirmation = guild_affirmers[payload.member.guild].get_short(name)
+    affirmation = guild_affirmers[payload.member.guild].get_text(name)
     await message.reply(affirmation) 
 
 # Startup
