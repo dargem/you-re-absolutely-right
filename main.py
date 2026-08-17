@@ -7,7 +7,6 @@ from discord.ext import commands
 from discord import Message, Guild, RawReactionActionEvent
 
 from collections import defaultdict
-from piper import PiperVoice, SynthesisConfig
 from affirmer import Affirmer
 from spam_buffer import SpamBuffer, PushResult
 from pathlib import Path
