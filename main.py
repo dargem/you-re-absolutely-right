@@ -11,7 +11,7 @@ from collections import defaultdict
 from affirmer import Affirmer
 from spam_buffer import SpamBuffer, PushResult
 from pathlib import Path
-from TTS import PiedPierTTS
+from TTS import PiedPierTTS, ElevenLabsTTS
 from logger import Logger, Level
 
 load_dotenv()
@@ -48,7 +48,7 @@ async def on_ready():
     for guild in bot.guilds:
         logger.log(Level.INFO, f" - {guild.name} (ID: {guild.id})")
 
-guild_affirmers: defaultdict[Guild, Affirmer] = defaultdict(lambda: Affirmer(PiedPierTTS()))
+guild_affirmers: defaultdict[Guild, Affirmer] = defaultdict(lambda: Affirmer(ElevenLabsTTS()))
 
 # If we've been pinged we will join VC and send an affirmation to the sender
 # The bot cannot join multiple vc's simultaneously in same guild

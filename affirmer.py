@@ -105,17 +105,18 @@ class Affirmer:
 
     def _get_TTS(self, text: str) -> Path:
         search_term = text + ".wav"
+        wanted_cache = WAV_CACHE / self.TTS.get_model_id()
 
-        WAV_CACHE.mkdir(exist_ok=True)
+        wanted_cache.mkdir(exist_ok=True, parents=True)
 
         # Very simple storage, name of wav is == text it speaks out. 
         # We have a "cache" where if text is the name of a file,
         with cache_lock:
-            for file in WAV_CACHE.iterdir():
+            for file in wanted_cache.iterdir():
                 if file.name == search_term:
                     return file
 
-            wanted_path = WAV_CACHE / search_term
+            wanted_path = wanted_cache / search_term
             # We have not found it in our cache, so we lazily generate it
             self.TTS.generate_text(text, wanted_path)
 
