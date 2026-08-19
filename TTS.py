@@ -38,12 +38,11 @@ class PiedPierTTS(AbstractTTS):
                 text,
                 wav_f,
                 syn_config=self.config
-            )
-
-    
+            )    
 
 load_dotenv()
 
+# Ensure your API key has Text to Speech enabled for endpoints
 class ElevenLabsTTS(AbstractTTS):
     def __init__(
         self, client: ElevenLabs = ElevenLabs(api_key=os.getenv("ELEVEN_LABS_API"))
@@ -51,11 +50,11 @@ class ElevenLabsTTS(AbstractTTS):
         self.client = client
 
     def generate_text(self, text: str, path: Path):
-        audio = self.client.generate(
+        # On the free plan only default voices
+        audio = self.client.text_to_speech.stream(
             text=text,
-            voice="Rachel",
-            model="eleven_multilingual_v2"
+            voice_id=os.getenv("ELEVEN_LABS_VOICE_ID"),
+            model_id="eleven_multilingual_v2"
         )
 
         save(audio, str(path))
-        
