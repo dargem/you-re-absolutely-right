@@ -52,7 +52,7 @@ class ElevenLabsTTS(AbstractTTS):
         self, client: ElevenLabs = ElevenLabs(api_key=os.getenv("ELEVEN_LABS_API"))
     ):
         self.client = client
-        self.voice_id=os.getenv("ELEVEN_LABS_VOICE_ID"),
+        self.voice_id=os.getenv("ELEVEN_LABS_VOICE_ID")
         self.model_id="eleven_multilingual_v2"
 
     def generate_text(self, text: str, path: Path):

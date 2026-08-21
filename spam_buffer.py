@@ -6,9 +6,9 @@ from enum import Enum
 from logger import Level, Logger
 
 class PushResult(Enum):
-    FAIL = 0,
-    SUCCESS = 1,
-    SUCCESS_REACHED_MAX = 2, # Successful push but now the buffer is maxed
+    FAIL = 0
+    SUCCESS = 1
+    SUCCESS_REACHED_MAX = 2 # Successful push but now the buffer is maxed
 
 # Maintains a queue with a given max size. Elements > 1m get deleted. 
 # If the queue is full you cannot add to it. Adding to a full queue is considered "spams"
