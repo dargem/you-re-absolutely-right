@@ -6,6 +6,7 @@ from elevenlabs import save
 from elevenlabs import ElevenLabs
 from dotenv import load_dotenv
 import os
+import wordninja
 
 class AbstractTTS(ABC):
     @abstractmethod
@@ -17,6 +18,14 @@ class AbstractTTS(ABC):
     @abstractmethod
     def get_model_id(self) -> str:
         pass
+
+    # Preprocesses the text to split up concatenated words like names
+    # e.g. genericname4 -> "generic name 4" which can be pronounced by TTS
+    def filter_text(self, text: str) -> str:
+        # Can consider more preprocessing like stripping out _ or - later 
+        # wordninja seems to do fine for now
+        parts = wordninja.split(text)
+        return " ".join(parts)
 
 
 class PiedPierTTS(AbstractTTS):
@@ -33,6 +42,7 @@ class PiedPierTTS(AbstractTTS):
         self.voice = voice
 
     def generate_text(self, text: str, path: Path):
+        text = self.filter_text(text)
         with wave.open(str(path), "wb") as wav_f:
             self.voice.synthesize_wav(
                 text,
@@ -56,6 +66,8 @@ class ElevenLabsTTS(AbstractTTS):
         self.model_id="eleven_multilingual_v2"
 
     def generate_text(self, text: str, path: Path):
+        text = self.filter_text(text)
+        
         # On the free plan only default voices
         audio = self.client.text_to_speech.stream(
             text=text,

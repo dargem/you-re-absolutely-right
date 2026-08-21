@@ -3,3 +3,4 @@ piper-tts
 python-dotenv
 pydub
 elevenlabs
+wordninja
