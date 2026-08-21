@@ -60,10 +60,17 @@ class ElevenLabsTTS(AbstractTTS):
         audio = self.client.text_to_speech.stream(
             text=text,
             voice_id=self.voice_id,
-            model_id=self.model_id
+            model_id=self.model_id,
+            output_format="pcm_22050",
         )
 
-        save(audio, str(path))
+        pcm_data = b"".join(audio)
+
+        with wave.open(str(path), "wb") as wav:
+            wav.setnchannels(1)       # mono
+            wav.setsampwidth(2)       # 16-bit PCM = 2 bytes/sample
+            wav.setframerate(22050)   # must match pcm_22050
+            wav.writeframes(pcm_data)
 
     def get_model_id(self):
         # May need to include model settings temp stuff
