@@ -6,7 +6,8 @@ You're absolutely right is a life changing discord bot that affirms your brillia
 
 Ping @You're Absolutely Right and it will back you up with praise in your vc. There hasn't been any issues with memory usage (yet).
 
-# VIDEO PLACEHOLDER
+https://github.com/user-attachments/assets/c657b75c-46d7-4d33-af7b-6607960b0aa4
+
 
 Install into your discord server with this [link](https://discord.com/oauth2/authorize?client_id=1531312045511933954)
 
