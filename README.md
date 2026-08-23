@@ -9,7 +9,6 @@ Ping @You're Absolutely Right and it will back you up with praise in your vc. Th
 
 https://github.com/user-attachments/assets/c657b75c-46d7-4d33-af7b-6607960b0aa4
 
-
 Install into your discord server with this [link](https://discord.com/oauth2/authorize?client_id=1531312045511933954)
 
 ## Features
