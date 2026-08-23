@@ -3,7 +3,7 @@
 You're absolutely right is a life changing discord bot that affirms your brilliant ideas. It has 2 modes, text and voice. You can trigger it via text by reacting with a 100% emoji and it will send out the positive affirmation your friends were going to soon send you.
 
 <img width="600" height="272" alt="image-3" src="https://github.com/user-attachments/assets/d66e208e-2a81-4171-868e-0bdaface7962"/>
-<br> <br>
+<br>
 
 Ping @You're Absolutely Right and it will back you up with praise in your vc. There hasn't been any issues with memory usage (yet).
 
